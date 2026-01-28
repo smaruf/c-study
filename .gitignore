@@ -36,6 +36,11 @@
 *.x86_64
 *.hex
 
+# Project-specific executables
+generator_control_rpi
+generator_control_arduino
+generator_control_esp32
+
 # Debug files
 *.dSYM/
 *.su
