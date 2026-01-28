@@ -48,16 +48,16 @@ int generator_init(void) {
 
 /**
  * Initialize sensor interfaces
- * Platform-specific implementation needed
+ * Platform-specific implementation needed (weak symbol)
  * @return 0 on success, error code otherwise
  */
-int sensors_init(void) {
+__attribute__((weak)) int sensors_init(void) {
     // Platform-specific sensor initialization
     // For ESP32: ADC configuration
     // For Arduino: analogRead setup
     // For RPI: I2C ADC (ADS1115) initialization
     
-    printf("Sensors initialized\n");
+    printf("Sensors initialized (default)\n");
     return 0;
 }
 
@@ -76,11 +76,11 @@ int network_init(void) {
 }
 
 /**
- * Read wind generator sensors
+ * Read wind generator sensors (weak symbol - override in platform code)
  * @param data Pointer to sensor data structure
  * @return 0 on success, error code otherwise
  */
-int read_wind_sensors(sensor_data_t* data) {
+__attribute__((weak)) int read_wind_sensors(sensor_data_t* data) {
     if (!data) return -1;
     
     // Platform-specific ADC reading
@@ -98,11 +98,11 @@ int read_wind_sensors(sensor_data_t* data) {
 }
 
 /**
- * Read solar generator sensors
+ * Read solar generator sensors (weak symbol - override in platform code)
  * @param data Pointer to sensor data structure
  * @return 0 on success, error code otherwise
  */
-int read_solar_sensors(sensor_data_t* data) {
+__attribute__((weak)) int read_solar_sensors(sensor_data_t* data) {
     if (!data) return -1;
     
     // Platform-specific ADC reading
@@ -116,11 +116,11 @@ int read_solar_sensors(sensor_data_t* data) {
 }
 
 /**
- * Read battery sensors
+ * Read battery sensors (weak symbol - override in platform code)
  * @param data Pointer to sensor data structure
  * @return 0 on success, error code otherwise
  */
-int read_battery_sensors(sensor_data_t* data) {
+__attribute__((weak)) int read_battery_sensors(sensor_data_t* data) {
     if (!data) return -1;
     
     // Platform-specific ADC reading
@@ -131,11 +131,11 @@ int read_battery_sensors(sensor_data_t* data) {
 }
 
 /**
- * Enable/disable wind generator
+ * Enable/disable wind generator (weak symbol - override in platform code)
  * @param enable true to enable, false to disable
  * @return 0 on success, error code otherwise
  */
-int wind_generator_enable(bool enable) {
+__attribute__((weak)) int wind_generator_enable(bool enable) {
     current_telemetry.state.wind_enabled = enable;
     
     // Platform-specific relay control
@@ -146,11 +146,11 @@ int wind_generator_enable(bool enable) {
 }
 
 /**
- * Control wind turbine brake
+ * Control wind turbine brake (weak symbol - override in platform code)
  * @param brake_level Brake level 0-100%
  * @return 0 on success, error code otherwise
  */
-int wind_brake_control(uint8_t brake_level) {
+__attribute__((weak)) int wind_brake_control(uint8_t brake_level) {
     if (brake_level > 100) brake_level = 100;
     
     current_telemetry.state.brake_active = (brake_level > 0);
@@ -184,11 +184,11 @@ bool wind_check_overspeed(float rpm) {
 }
 
 /**
- * Enable/disable solar generator
+ * Enable/disable solar generator (weak symbol - override in platform code)
  * @param enable true to enable, false to disable
  * @return 0 on success, error code otherwise
  */
-int solar_generator_enable(bool enable) {
+__attribute__((weak)) int solar_generator_enable(bool enable) {
     current_telemetry.state.solar_enabled = enable;
     
     // Platform-specific relay control
@@ -249,11 +249,11 @@ int solar_mppt_update(sensor_data_t* solar_data) {
 }
 
 /**
- * Set solar PWM duty cycle
+ * Set solar PWM duty cycle (weak symbol - override in platform code)
  * @param duty Duty cycle 0.0-1.0
  * @return 0 on success, error code otherwise
  */
-int solar_set_pwm_duty(float duty) {
+__attribute__((weak)) int solar_set_pwm_duty(float duty) {
     if (duty < 0.0f) duty = 0.0f;
     if (duty > 1.0f) duty = 1.0f;
     
@@ -363,7 +363,7 @@ int log_telemetry(telemetry_data_t* data) {
     if (!data) return -1;
     
     printf("\n=== TELEMETRY LOG ===\n");
-    printf("Uptime: %lu seconds\n", data->state.uptime);
+    printf("Uptime: %u seconds\n", data->state.uptime);
     printf("Wind: V=%.2f I=%.2f P=%.2f RPM=%.0f\n",
            data->wind.voltage, data->wind.current, 
            data->wind.power, data->wind.rpm);

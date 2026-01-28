@@ -21,7 +21,10 @@
  * @date 2026
  */
 
+#ifndef PLATFORM_RPI
 #define PLATFORM_RPI
+#endif
+
 #include "generator_config.h"
 #include "generator_control.h"
 
@@ -82,9 +85,13 @@ int gpio_export(int pin) {
         return -1;
     }
     
-    int len = snprintf(buffer, sizeof(buffer), "%d", pin);
-    write(fd, buffer, len);
+    ssize_t len = snprintf(buffer, sizeof(buffer), "%d", pin);
+    ssize_t written = write(fd, buffer, len);
     close(fd);
+    
+    if (written < 0) {
+        return -1;
+    }
     
     usleep(100000); // Wait for GPIO to be exported
     return 0;
@@ -103,9 +110,10 @@ int gpio_set_direction(int pin, const char* direction) {
         return -1;
     }
     
-    write(fd, direction, strlen(direction));
+    ssize_t written = write(fd, direction, strlen(direction));
     close(fd);
-    return 0;
+    
+    return (written < 0) ? -1 : 0;
 }
 
 /**
@@ -126,9 +134,10 @@ int gpio_write(int pin, int value) {
     val_str[0] = value ? '1' : '0';
     val_str[1] = '\0';
     
-    write(fd, val_str, 1);
+    ssize_t written = write(fd, val_str, 1);
     close(fd);
-    return 0;
+    
+    return (written < 0) ? -1 : 0;
 }
 
 /**
@@ -172,7 +181,7 @@ int i2c_adc_init(void) {
 /**
  * Read voltage from I2C ADC channel
  */
-float read_i2c_adc_voltage(int channel) {
+float read_i2c_adc_voltage(int channel __attribute__((unused))) {
     // Placeholder - implement actual I2C reading
     // ADS1115 has 4 channels (0-3)
     // Return dummy value for now
@@ -182,7 +191,7 @@ float read_i2c_adc_voltage(int channel) {
 /**
  * Read current from I2C ADC channel
  */
-float read_i2c_adc_current(int channel) {
+float read_i2c_adc_current(int channel __attribute__((unused))) {
     // Placeholder - implement actual I2C reading
     return 5.0f; // Example: 5A current
 }
@@ -304,7 +313,7 @@ int solar_set_pwm_duty(float duty) {
 /**
  * Main function for Raspberry Pi
  */
-int main(int argc, char** argv) {
+int main(int argc __attribute__((unused)), char** argv __attribute__((unused))) {
     printf("\n=================================\n");
     printf("Wind/Solar Generator Controller\n");
     printf("Raspberry Pi Platform\n");
